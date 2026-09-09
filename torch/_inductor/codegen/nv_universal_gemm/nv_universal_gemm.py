@@ -12,6 +12,7 @@ from enum import auto, Enum
 from typing import Any, Literal
 
 import torch
+from torch._dynamo.device_interface import get_interface_for_device
 from torch._inductor import config
 from torch._inductor.autotune_process import (
     BenchmarkRequest,
@@ -235,6 +236,7 @@ class NVUniversalGemmBenchmarkRequest(GPUDeviceBenchmarkMixin, BenchmarkRequest)
             self._workspace = None
 
         workspace = self._workspace
+        device_interface = get_interface_for_device(out.device.type)
 
         def run_kernel():
             stream = device_interface.current_stream()
@@ -323,6 +325,7 @@ class NVUniversalGemmBenchmarkRequest(GPUDeviceBenchmarkMixin, BenchmarkRequest)
         else:
             self._workspace = None
         workspace = self._workspace
+        device_interface = get_interface_for_device(out.device.type)
 
         def run_kernel():
             kernel.run(
