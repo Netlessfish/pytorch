@@ -237,7 +237,7 @@ class NVUniversalGemmBenchmarkRequest(GPUDeviceBenchmarkMixin, BenchmarkRequest)
         workspace = self._workspace
 
         def run_kernel():
-            stream = torch.cuda.current_stream()
+            stream = device_interface.current_stream()
             kernel.run(
                 args,
                 artifact,
@@ -328,7 +328,7 @@ class NVUniversalGemmBenchmarkRequest(GPUDeviceBenchmarkMixin, BenchmarkRequest)
             kernel.run(
                 args,
                 artifact,
-                stream=torch.cuda.current_stream(),
+                stream=device_interface.current_stream(),
                 workspace=workspace,
                 assume_supported_args=True,
             )
