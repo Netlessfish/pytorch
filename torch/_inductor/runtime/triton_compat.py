@@ -46,18 +46,27 @@ if triton is not None:
 
     # In the latest triton, math functions were shuffled around into different modules:
     # https://github.com/triton-lang/triton/pull/3172
+    _libdevice_vendors: list[str] = []
+
+    def register_libdevice_vendor(name: str) -> None:
+        if name not in _libdevice_vendors:
+            _libdevice_vendors.append(name)
+
+    register_libdevice_vendor("cuda")
+    register_libdevice_vendor("intel")
+
     try:
         from triton.language.extra import libdevice
 
         libdevice = tl.extra.libdevice  # noqa: F811
         math = tl.math
     except ImportError:
-        if hasattr(tl.extra, "cuda") and hasattr(tl.extra.cuda, "libdevice"):
-            libdevice = tl.extra.cuda.libdevice
-            math = tl.math
-        elif hasattr(tl.extra, "intel") and hasattr(tl.extra.intel, "libdevice"):
-            libdevice = tl.extra.intel.libdevice
-            math = tl.math
+        for _name in _libdevice_vendors:
+            _sub = getattr(tl.extra, _name, None)
+            if _sub is not None and hasattr(_sub, "libdevice"):
+                libdevice = _sub.libdevice
+                math = tl.math
+                break
         else:
             libdevice = tl.math
             math = tl
